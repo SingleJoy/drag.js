@@ -1,0 +1,131 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta http-equiv="X-UA-Compatible" content="ie=edge">
+	<title>支持h5 drag 拖拽插件</title>
+
+	<style>
+		*{
+			margin: 0;
+			padding: 0;
+		}
+		#container{
+			position: relative;
+			width: 300px;
+			height: 400px;
+			background-color: #fff;
+			border: 1px solid red;
+			box-sizing: border-box;
+			margin: 40px 50px 60px 20px;
+		}
+		#drag{
+			position: absolute;
+			width: 100px;
+			height:100px;
+			border: 1px solid #000;
+			background-color: #eee;
+			box-sizing: border-box;
+			left: 20px;
+			top:30px;
+		}
+
+	</style>
+
+</head>
+<body>
+
+<!--兼容h5 拖拽插件
+   可以提分为三个事件
+   默认为不可操作状态operated=false
+  touchstart(相当于PC onmousedown)
+   移动端点击元素进入被拖拽元素 touch事件
+   记录点击一瞬间拖拽盒子相对
+   父盒子offsetX=drag.offsetLeft
+         offsetY=drag.offsetTop
+    同时记录下击的位置相对“浏览器的initX和initY”
+    注意 PC端与移动端(h5) touch时间有区别  PC端传入e即表示事件对象
+    而移动端获取事件对象是e.touches[0]表示
+    获取touch时间点相对于浏览器的X和Y
+           initX = e.touches[0].clientX;
+		   initY = e.touches[0].clientY;
+
+	 touchmove touch移动事件(相当于PC onmousemove)
+	   clientX移动中实时相对于浏览器的X
+	   clientY移动中实时相对于浏览器的Y
+
+	浏览器在此次touchstart相对鼠标开始按下一瞬间初始位置滑动的X距离,Y距离
+	moveX=e.touches[0].clientX-initX;
+	moveY=e.touches[0].clientY-initX;
+	拖拽盒子相对定位为absolute
+	拖拽盒子在touch事件移动过程中  disX是等于touchstart触发瞬间 拖拽盒子相对于父盒子offsetX的位置加上touchmove时间中滑动的距离moveX,同理moveY
+	disX=moveX+offsetX;
+	disY=moveY+offsetY;
+
+   touchend touch结束事件(相当于PC onmouseup)
+
+
+  如需继续进行整个拖拽过程，需要重复循环换touchstart,touchmove,touchend过程
+
+-->
+<div id="container">
+	<div id="drag"></div>
+</div>
+
+
+<script>
+	var drag=document.getElementById("drag");
+	var container=document.getElementById("container");
+	var dragX=drag.offsetWidth; //拖拽元素盒子宽度
+	var dragY=drag.offsetHeight; //拖拽元素盒子高度
+	var containerX=container.offsetWidth; //拖拽元素父级盒子宽度
+	var containerY=container.offsetHeight; //拖拽元素父级盒子高度
+	var initX;  //当前元素X
+	var initY;  //当前元素Y
+
+
+	drag.addEventListener('touchstart',function (e) {
+			//阻止页面有默认事件
+		event.preventDefault();
+		offsetX=drag.offsetLeft;   //当前元素相对父盒子的X
+		offsetY=drag.offsetTop; //当前元素相对父盒子的Y
+
+		initX = event.touches[0].clientX;
+		initY = event.touches[0].clientY;
+
+	})
+
+	drag.addEventListener('touchmove',function (e) {
+			//阻止页面有默认事件
+		event.preventDefault();
+		var moveX=event.touches[0].clientX-initX;
+		var moveY=event.touches[0].clientY-initY;
+
+		var disX=moveX+offsetX;
+		var disY=moveY+offsetY;
+		if(disX<0){
+			disX=0
+		}else if((dragX+disX)>containerX){
+			disX=containerX-dragX;
+		}
+		if(disY<0){
+			disY=0
+		}else if((dragY+disY)>containerY){
+			disY=containerY-dragY;
+		}
+		drag.style.left=disX+'px';
+		drag.style.top=disY+'px';
+
+
+	})
+
+	drag.addEventListener('touchend',function (e) {
+		// console.log("touchend");
+	})
+
+</script>
+
+</body>
+</html>
