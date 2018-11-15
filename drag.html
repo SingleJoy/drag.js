@@ -1,0 +1,137 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta http-equiv="X-UA-Compatible" content="ie=edge">
+	<title>drag 拖拽插件</title>
+
+	<style>
+		*{
+			margin: 0;
+			padding: 0;
+		}
+		#container{
+			position: relative;
+			width: 400px;
+			height: 400px;
+			background-color: #fff;
+			border: 1px solid red;
+			box-sizing: border-box;
+			margin: 40px 50px 60px 70px;
+		}
+		#drag{
+			position: absolute;
+			width: 150px;
+			height:150px;
+			border: 1px solid #000;
+			background-color: #eee;
+			box-sizing: border-box;
+			left: 20px;
+			top:30px;
+
+		}
+		#drag:hover{
+			cursor: move;
+		}
+
+	</style>
+
+</head>
+<body>
+
+<!--拖拽插件
+   可以提分为三个事件
+   默认为不可操作状态operated=false
+   onmousedown
+   鼠标进入被拖拽元素点击事件 修改为可操作状态 operated=true
+   鼠标状态变成拖拽状态  记录鼠标点击一瞬间拖拽盒子相对
+   父盒子offsetX=drag.offsetLeft
+         offsetY=drag.offsetTop
+    同时记录下鼠标点击的位置相对“浏览器的initX和initY”
+          initX = e.clientX;
+		   initY = e.clientY;
+
+	 onmousemove 鼠标移动事件
+	 e.clientX鼠标移动中实时相对于浏览器的X
+	 e.clientY鼠标移动中实时相对于浏览器的Y
+	  浏览器在此次鼠标按下相对鼠标开始按下一瞬间初始位置滑动的X距离,Y距离
+	moveX=e.clientX-initX;
+	moveY=e.clientY-initX;
+	拖拽盒子相对定位为absolute
+	拖拽盒子在鼠标按下移动过程中  disX是等于鼠标按下瞬间 拖拽盒子相对于父盒子offsetX的位置加上鼠标滑动的距离moveX,同理moveY
+	disX=moveX+offsetX;
+	disY=moveY+offsetY;
+
+   onmouseup 鼠标释放事件
+   operated=!operated;
+  此次拖拽过程结束  不可继续操作 鼠标释放后  拖拽盒子不会继续鼠标鼠标移动而移动，
+  如需继续进行整个拖拽过程，需要鼠标循环换onmousedown和onmousemove过程
+
+-->
+<div id="container">
+	<div id="drag"></div>
+</div>
+
+
+<script>
+	var drag=document.getElementById("drag");
+	var container=document.getElementById("container");
+	var dragX=drag.offsetWidth; //拖拽元素盒子宽度
+	var dragY=drag.offsetHeight; //拖拽元素盒子高度
+	var containerX=container.offsetWidth; //拖拽元素父级盒子宽度
+	var containerY=container.offsetHeight; //拖拽元素父级盒子高度
+	var initX;  //当前元素X
+	var initY;  //当前元素Y
+
+
+	var operated=false
+	drag.onmousedown=function (e) {
+		offsetX=drag.offsetLeft;   //当前元素相对父盒子的X
+		offsetY=drag.offsetTop; //当前元素相对父盒子的Y
+		operated=!operated;
+		initX = e.clientX;
+		initY = e.clientY;
+		// console.log(offsetX)
+		// console.log("initX:"+initX);
+		// console.log("initY:"+initY);
+	}
+
+	drag.onmousemove=function (e) {
+
+		e=e||window.event;
+		var moveX=e.clientX-initX;
+		var moveY=e.clientY-initY;
+		// console.log("e.clientX:"+e.clientX); //clientX鼠标移动中实时相对于浏览器的X
+		// console.log("e.clientY:"+e.clientY);//clientY鼠标移动中实时相对于浏览器的Y
+
+		if(operated){
+			var disX=moveX+offsetX;
+			var disY=moveY+offsetY;
+			if(disX<0){
+				disX=0
+			}else if((dragX+disX)>containerX){
+				disX=containerX-dragX;
+			}
+			if(disY<0){
+				disY=0
+			}else if((dragY+disY)>containerY){
+				disY=containerY-dragY;
+			}
+			drag.style.left=disX+'px';
+			drag.style.top=disY+'px';
+
+		}
+
+	}
+
+
+	drag.onmouseup=function (){
+		operated=!operated;
+	};
+
+</script>
+
+</body>
+</html>
